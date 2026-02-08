@@ -94,4 +94,11 @@ class RoutineController extends Controller
         $routine->exercises()->detach($e_id);
         return response()->json(['message' => 'Ejercicio eliminado']);
     }
+
+    public function publicIndex()
+{
+    return RoutineResource::collection(
+        Routine::with('exercises')->get()
+    );
+}
 }

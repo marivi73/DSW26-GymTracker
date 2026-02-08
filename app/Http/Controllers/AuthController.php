@@ -9,45 +9,62 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // POST /login
-    public function login(Request $request)
-    {
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Credenciales inválidas'], 401);
-        }
-
-        $user = Auth::user();
-
-        // Creación del token de autenticación
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login exitoso',
-            'user' => $user,
-            'token' => $token,
-        ]);
-    }
-
-    // POST /register
+    /**
+     * Registro de usuario
+     */
     public function register(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|confirmed',
+        ]);
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        return response()->json([
-            'message' => 'Usuario registrado exitosamente',
-            'user' => $user,
-        ], 201);
+        return response()->json($user, 201);
     }
 
-    // POST /logout
+    /**
+     * Login de usuario
+     */
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'Credenciales incorrectas'
+            ], 401);
+        }
+
+        // Crear token con Sanctum
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * Logout (revoca el token actual)
+     */
     public function logout(Request $request)
     {
-        // Invalida el token de autenticación actual
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logout exitoso']);
+
+        return response()->json([
+            'message' => 'Sesión cerrada correctamente'
+        ]);
     }
 }

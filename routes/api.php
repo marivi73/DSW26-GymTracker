@@ -1,22 +1,27 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\RoutineController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ExerciseController;
+use App\Http\Controllers\MyRoutineController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/routines', [RoutineController::class, 'index']);
-    Route::post('/routines', [RoutineController::class, 'store']);
-});
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/routines', [RoutineController::class, 'index']);
+    Route::post('/routines', [RoutineController::class, 'store']);
+});
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
@@ -55,3 +60,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/my-routines', [MyRoutineController::class, 'store']);
     Route::delete('/my-routines/{id}', [MyRoutineController::class, 'destroy']);
 });
+
+Route::get('/routines', [RoutineController::class, 'publicIndex']);

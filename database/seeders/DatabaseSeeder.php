@@ -28,6 +28,9 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Pierna', 'icon_path' => 'icons/leg.png'],
         ]);
 
+        // Obtenerlas como modelos
+        $categories = Category::all();
+
         // Crear ejercicios asociados a categorías
         $exercises = Exercise::factory(10)->create();
 
