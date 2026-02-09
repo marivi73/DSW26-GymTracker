@@ -2,46 +2,54 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Category;
-use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-     // GET /categories
     public function index()
     {
-        return Category::all();
+        return view('categories.index', [
+            'categories' => Category::all()
+        ]);
     }
 
-    // GET /categories/{id}
-    public function show(Category $category)
+    public function create()
     {
-        return $category;
+        return view('categories.create');
     }
 
-    // POST /categories
     public function store(Request $request)
     {
-        return Category::create($request->only('name', 'icon_path'));
+        $request->validate([
+            'name' => 'required|string',
+            'icon_path' => 'nullable|string',
+        ]);
+
+        Category::create($request->only('name', 'icon_path'));
+        return redirect()->route('categories.index')->with('success', 'Categoría creada');
     }
 
-    // PUT /categories/{id}
+    public function edit(Category $category)
+    {
+        return view('categories.edit', compact('category'));
+    }
+
     public function update(Request $request, Category $category)
     {
+        $request->validate([
+            'name' => 'required|string',
+            'icon_path' => 'nullable|string',
+        ]);
+
         $category->update($request->only('name', 'icon_path'));
-        return $category;
+        return redirect()->route('categories.index')->with('success', 'Categoría actualizada');
     }
 
-    // DELETE /categories/{id}
     public function destroy(Category $category)
     {
         $category->delete();
-        return response()->noContent();
-    }
-
-    // GET /categories/{id}/exercises
-    public function exercises(Category $category)
-    {
-        return $category->exercises;
+        return redirect()->route('categories.index')->with('success', 'Categoría eliminada');
     }
 }
+

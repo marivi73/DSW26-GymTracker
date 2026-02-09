@@ -1,17 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    /**
-     * Registro de usuario
-     */
     public function register(Request $request)
     {
         $request->validate([
@@ -29,9 +26,6 @@ class AuthController extends Controller
         return response()->json($user, 201);
     }
 
-    /**
-     * Login de usuario
-     */
     public function login(Request $request)
     {
         $request->validate([
@@ -41,13 +35,10 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Credenciales incorrectas'
-            ], 401);
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Credenciales incorrectas'], 401);
         }
 
-        // Crear token con Sanctum
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
@@ -56,15 +47,10 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Logout (revoca el token actual)
-     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Sesión cerrada correctamente'
-        ]);
+        return response()->json(['message' => 'Sesión cerrada']);
     }
 }
+
